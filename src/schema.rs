@@ -203,6 +203,7 @@ diesel::table! {
         #[max_length = 256]
         access_key -> Varchar,
         approved_by_user_uid -> Nullable<Uuid>,
+        authority_id -> Nullable<Uuid>,
     }
 }
 
@@ -214,7 +215,6 @@ diesel::table! {
 }
 
 diesel::joinable!(authorities -> nations (nation_id));
-diesel::joinable!(authorities -> users (creator_id));
 diesel::joinable!(classification_schemas -> authorities (authority_id));
 diesel::joinable!(classification_schemas -> users (creator_id));
 diesel::joinable!(conversion_requests -> authorities (authority_id));

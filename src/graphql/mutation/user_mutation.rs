@@ -85,6 +85,9 @@ impl UserMutation {
         _context: &Context<'_>,
         user_data: UserData,
     ) -> FieldResult<User> {
+        // Validate authority requirement before creating user
+        User::validate_authority_requirement(&user_data.role, user_data.authority_id)?;
+
         let new_user = InsertableUser::from(user_data);
 
         let created_user = User::create(new_user);
@@ -119,6 +122,13 @@ impl UserMutation {
         if let Some(s) = user_data.role {
             target_user.role = s;
         };
+
+        if let Some(auth_id) = user_data.authority_id {
+            target_user.authority_id = Some(auth_id);
+        };
+
+        // Validate authority requirement with potentially updated role and authority_id
+        User::validate_authority_requirement(&target_user.role, target_user.authority_id)?;
 
         let updated_user = target_user.update();
 

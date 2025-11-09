@@ -17,6 +17,7 @@ pub struct UserInstance {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, SimpleObject, Queryable, AsChangeset)]
+#[graphql(complex)]
 pub struct User {
     #[graphql(
         guard = "RoleGuard::new(UserRole::Admin)",
@@ -60,9 +61,46 @@ pub struct User {
     )]
     /// Access Level: Admin
     pub approved_by_user_uid: Option<Uuid>,
+
+    #[graphql(
+        guard = "RoleGuard::new(UserRole::Admin)",
+        visible = "is_admin",
+    )]
+    /// Foreign key to Authority - Required for non-ADMIN users
+    /// Establishes User -> Authority -> Nation hierarchy
+    pub authority_id: Option<Uuid>,
 }
 
 impl User {
+    /// Validates that authority_id is provided for non-admin users and that the authority exists
+    pub fn validate_authority_requirement(
+        role: &str,
+        authority_id: Option<Uuid>
+    ) -> Result<(), Error> {
+        // Admin users don't need an authority
+        if role == "ADMIN" {
+            return Ok(());
+        }
+
+        // All other roles require an authority
+        let auth_id = authority_id.ok_or_else(|| {
+            Error::new(format!(
+                "Users with role '{}' must be associated with an Authority. Only ADMIN users can exist without an authority.",
+                role
+            ))
+        })?;
+
+        // Validate that the authority exists
+        use crate::models::Authority;
+        Authority::get_by_id(&auth_id).map_err(|_| {
+            Error::new(format!(
+                "Authority with id {} does not exist. Please provide a valid authority_id.",
+                auth_id
+            ))
+        })?;
+
+        Ok(())
+    }
 
     pub fn get_by_id(id: &Uuid) -> Result<Self> {
         let mut conn = connection()?;
@@ -121,6 +159,23 @@ impl User {
     }
 }
 
+// GraphQL ComplexObject implementation for User->Authority relationship
+#[ComplexObject]
+impl User {
+    /// Get the authority this user belongs to (if any)
+    /// Returns None for ADMIN users who don't belong to an authority
+    pub async fn authority(&self, ctx: &Context<'_>) -> Result<Option<crate::models::Authority>> {
+        match self.authority_id {
+            Some(authority_id) => {
+                let loaders = ctx.data::<crate::graphql::Loaders>()?;
+                let authority = loaders.authority_loader.load(authority_id).await;
+                Ok(Some(authority))
+            },
+            None => Ok(None),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize, Insertable)]
 #[diesel(table_name = users)]
 pub struct InsertableUser {
@@ -133,6 +188,7 @@ pub struct InsertableUser {
     pub updated_at: NaiveDateTime,
     pub access_key: String,
     pub approved_by_user_uid: Option<Uuid>,
+    pub authority_id: Option<Uuid>,
 }
 
 #[derive(Debug, Deserialize, Serialize, InputObject)]
@@ -143,10 +199,12 @@ pub struct UserData {
     pub password: String,
     /// UserRole in system: USER, OPERATOR, ANALYST, ADMIN
     pub role: String,
+    /// Authority ID - Required for non-ADMIN users
+    pub authority_id: Option<Uuid>,
 }
 
 #[derive(Debug, Deserialize, Serialize, InputObject)]
-/// Input Struct to create a new user. Only accessible by Administrators.
+/// Input Struct to update a user. Only accessible by Administrators.
 pub struct UserUpdate {
     pub id: Uuid,
     pub name: Option<String>,
@@ -154,6 +212,8 @@ pub struct UserUpdate {
     pub password: Option<String>,
     /// UserRole in system: USER, OPERATOR, ANALYST, ADMIN
     pub role: Option<String>,
+    /// Authority ID - Required for non-ADMIN users
+    pub authority_id: Option<Uuid>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, SimpleObject)]
@@ -183,9 +243,10 @@ impl From<UserData> for InsertableUser {
             email,
             password,
             role,
+            authority_id,
             ..
         } = user_data;
-        
+
         let hash = hash_password(&password)
             .expect("Unable to hash password")
             .to_string();
@@ -200,6 +261,7 @@ impl From<UserData> for InsertableUser {
             access_key: "".to_owned(),
             access_level: "detailed".to_owned(),
             approved_by_user_uid: None,
+            authority_id,
         }
     }
 }

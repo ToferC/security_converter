@@ -52,6 +52,7 @@ pub fn init() {
                 email: admin_email.trim().to_owned(),
                 password: admin_pwd.trim().to_owned(),
                 role: "ADMIN".to_owned(),
+                authority_id: None,  // Admin has no authority
             };
         
             let test_admin = InsertableUser::from(admin_data);
@@ -63,14 +64,6 @@ pub fn init() {
 
             let _res = pre_populate_db_schema()
                 .expect("Unable to pre-populate database");
-            
-            /*
-            let _res = pre_populate_skills().expect("error in populating skills");
-
-            println!("Pre-populating database");
-
-            //populate_db_with_demo_data();
-             */
 
         }
     }

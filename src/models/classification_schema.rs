@@ -201,6 +201,16 @@ impl ClassificationSchema {
         Ok(res)
     }
 
+    // Return most recently updated Schema for a single nation by nation code
+    pub fn get_latest_by_authority_id(authority_id: &Uuid) -> Result<Self> {
+        let mut conn = database::connection()?;
+        let res = classification_schemas::table
+            .filter(classification_schemas::authority_id.eq(authority_id))
+            .order(classification_schemas::updated_at.desc())
+            .first(&mut conn)?;
+        Ok(res)
+    }
+
     pub fn get_count() -> Result<i64> {
         let mut conn = database::connection()?;
 

@@ -1,6 +1,6 @@
 use async_graphql::*;
 
-use crate::graphql::{AuditLogQuery, ClassificationSchemaQuery, ConversionRequestQuery, ConversionResponseQuery, DataObjectQuery, MetadataQuery, NationQuery, query::UserQuery};
+use crate::graphql::{AuditLogQuery, AuthorityQuery, ClassificationSchemaQuery, ConversionRequestQuery, ConversionResponseQuery, DataObjectQuery, MetadataQuery, NationQuery, query::UserQuery};
 
 #[derive(Default, MergedObject)]
 pub struct Query(
@@ -9,6 +9,7 @@ pub struct Query(
     DataObjectQuery,
     MetadataQuery,
     NationQuery,
+    AuthorityQuery,
     ClassificationSchemaQuery,
     ConversionRequestQuery,
     ConversionResponseQuery,

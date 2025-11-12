@@ -16,6 +16,11 @@ It also includes :
 - [x] Automated Admin Generation
 - [x] Authentication and sign-in
 
+Thoughts/Questions/To-do:
+- [ ] Should we set up for Authority to Authority sharing?
+- [ ] What is the best model for Context to Context sharing?
+- [ ] Need to add Releasable options to ConversionSchema.
+
 ## Dependencies
 
 - Diesel-cli

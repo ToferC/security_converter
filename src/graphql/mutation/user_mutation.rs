@@ -7,6 +7,7 @@ use crate::models::{InsertableUser, LoginQuery,
     verify_password, UserUpdate, hash_password};
 use crate::common_utils::{UserRole,
     is_admin, RoleGuard};
+use uuid::Uuid;
 // use rdkafka::producer::FutureProducer;
 // use crate::kafka::send_message;
 
@@ -15,6 +16,7 @@ pub struct UserMutation;
 
 #[derive(Debug, Serialize, Deserialize, SimpleObject)]
 pub struct UserResponse {
+    id: Uuid,
     bearer: String,
     role: String,
     email: String,
@@ -25,6 +27,8 @@ pub struct UserResponse {
 #[Object]
 impl UserMutation {
     /*
+    ## Keeping as example of Kafka subscription service
+
     #[graphql(
         name = "PILQuery", 
         guard = "RoleGuard::new(UserRole::Operator)",
@@ -154,6 +158,7 @@ impl UserMutation {
                     let token = create_token(user.id.to_string(), role);
 
                     let res = UserResponse {
+                        id: user.id,
                         email: user.email.to_owned(),
                         bearer: token.to_owned(),
                         role: user.role,

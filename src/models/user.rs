@@ -222,6 +222,7 @@ pub struct SlimUser {
     pub email: String,
     pub role: String,
     pub access_level: String,
+    pub authority_id: Option<Uuid>,
 }
 
 #[derive(Shrinkwrap, Clone, Default)]
@@ -273,6 +274,7 @@ impl From<User> for SlimUser {
             email,
             role,
             access_level,
+            authority_id,
             ..
         } = user;
 
@@ -281,6 +283,7 @@ impl From<User> for SlimUser {
             email,
             role,
             access_level,
+            authority_id,
         }
     }
 }

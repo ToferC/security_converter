@@ -48,6 +48,16 @@ openssl rand -base64 32
 - `diesel migration run`
 - `cargo run`
 
+## Chris' Notes: Apollo Publishing and updating Schema
+
+### Publish
+rover graph introspect \
+  http://localhost:8080/graphql --header="Authorization: Bearer <token>" | \
+  rover graph publish NATOclassificationconverter@current --schema -
+
+### Local Schema
+rover graph introspect http://127.0.0.1:8080/graphql --header="Authorization: Bearer <token>" --output=schema.graphqls
+
 ## Dan's notes
 
 ### Running on MacOS

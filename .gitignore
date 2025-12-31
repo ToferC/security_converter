@@ -21,3 +21,4 @@ ENCRYPTION_MASTER_KEY
 orgchart/npm-debug.log*
 orgchart/yarn-debug.log*
 orgchart/yarn-error.log*
+node_modules

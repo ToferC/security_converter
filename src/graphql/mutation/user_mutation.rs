@@ -20,6 +20,7 @@ pub struct UserResponse {
     bearer: String,
     role: String,
     email: String,
+    authority_id: Option<Uuid>,
 }
 
 // Mutation Example
@@ -162,6 +163,7 @@ impl UserMutation {
                         email: user.email.to_owned(),
                         bearer: token.to_owned(),
                         role: user.role,
+                        authority_id: user.authority_id,
                     };
 
 

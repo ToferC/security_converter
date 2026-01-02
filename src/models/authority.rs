@@ -45,8 +45,8 @@ impl Authority {
         ClassificationSchema::get_by_authority_id(&self.id)
     }
 
-    pub async fn most_recent_classification_schema(&self) -> Result<Vec<ClassificationSchema>> {
-        ClassificationSchema::get_by_authority_id(&self.id)
+    pub async fn most_recent_classification_schema(&self) -> Result<ClassificationSchema> {
+        ClassificationSchema::get_latest_by_authority_id(&self.id)
     }
 }
 

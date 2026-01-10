@@ -7,7 +7,7 @@ use diesel::{QueryDsl, RunQueryDsl};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::models::{ClassificationSchema, Nation, User};
+use crate::models::{ClassificationSchema, Nation, User, ConversionRequest};
 use crate::{database, schema::*};
 
 #[derive(
@@ -39,6 +39,10 @@ impl Authority {
 
     pub async fn nation(&self) -> Result<Nation> {
         Nation::get_by_id(&self.nation_id)
+    }
+
+    pub async fn conversion_requests(&self) -> Result<Vec<ConversionRequest>> {
+        ConversionRequest::get_by_authority_id(&self.id)
     }
 
     pub async fn classification_schemas(&self) -> Result<Vec<ClassificationSchema>> {

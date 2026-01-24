@@ -5,12 +5,19 @@ use async_graphql::*;
 use chrono::prelude::*;
 use diesel::{self, ExpressionMethods, Insertable, Queryable};
 use diesel::{QueryDsl, RunQueryDsl};
+use diesel::sql_types::{Array, Nullable, Text};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::encryption::EncryptedString;
 use crate::models::{Authority, DataObject};
 use crate::{database, schema::*};
+
+// Define PostgreSQL array contains function
+diesel::define_sql_function! {
+    /// Check if a PostgreSQL array contains a specific element
+    fn array_position(array: Array<Nullable<Text>>, element: Nullable<Text>) -> Nullable<diesel::sql_types::Integer>;
+}
 
 /// Represents the count of metadata records for a specific domain
 #[derive(Debug, Clone, Deserialize, Serialize, SimpleObject)]
@@ -234,6 +241,57 @@ impl Metadata {
             .collect();
 
         Ok(result)
+    }
+
+    /// Search for metadata records that contain the specified tag in their tags array (exact match)
+    pub fn get_by_tag(tag: &str) -> Result<Vec<Self>> {
+        let mut conn = database::connection()?;
+
+        let tag_value: Option<String> = Some(tag.to_string());
+        let res = metadata::table
+            .filter(array_position(metadata::tags, tag_value).is_not_null())
+            .load::<Metadata>(&mut conn)?;
+
+        Ok(res)
+    }
+
+    /// Search for metadata records that contain ANY of the specified tags (exact match)
+    pub fn get_by_tags(tags: &[String]) -> Result<Vec<Self>> {
+        let mut conn = database::connection()?;
+
+        let mut query = metadata::table.into_boxed();
+
+        // Build OR conditions for each tag
+        for tag in tags {
+            let tag_value: Option<String> = Some(tag.clone());
+            query = query.or_filter(
+                array_position(metadata::tags, tag_value).is_not_null()
+            );
+        }
+
+        let res = query.load::<Metadata>(&mut conn)?;
+        Ok(res)
+    }
+
+    /// Search for metadata records where any tag matches the pattern (case-insensitive, partial match)
+    /// Uses SQL LIKE pattern matching on the array cast to text
+    pub fn search_by_tag_pattern(pattern: &str) -> Result<Vec<Self>> {
+        use diesel::dsl::sql;
+        use diesel::sql_types::Bool;
+
+        let mut conn = database::connection()?;
+
+        // Use PostgreSQL's array_to_string to convert array to text and search with ILIKE
+        let search_pattern = format!("%{}%", pattern);
+
+        let res = metadata::table
+            .filter(sql::<Bool>(&format!(
+                "array_to_string(tags, ',') ILIKE '{}'",
+                search_pattern.replace("'", "''") // Escape single quotes
+            )))
+            .load::<Metadata>(&mut conn)?;
+
+        Ok(res)
     }
 
     pub fn update(&self) -> Result<Self> {

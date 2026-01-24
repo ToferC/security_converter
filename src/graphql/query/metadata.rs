@@ -102,4 +102,43 @@ impl MetadataQuery {
     ) -> Result<Vec<DomainCount>> {
         Metadata::get_counts_by_domain()
     }
+
+    /// Search for metadata records by exact tag match
+    ///
+    /// Returns all metadata where the tags array contains the exact tag value (case-sensitive).
+    ///
+    /// Example: tag = "sigint" will match only metadata with exactly "sigint" in tags
+    pub async fn metadata_by_tag(
+        &self,
+        tag: String,
+    ) -> Result<Vec<MetadataGraphQL>> {
+        let metadata = Metadata::get_by_tag(&tag)?;
+        Ok(metadata.into_iter().map(|m| m.into()).collect())
+    }
+
+    /// Search for metadata records by multiple exact tags (OR logic)
+    ///
+    /// Returns all metadata where the tags array contains ANY of the specified tags.
+    ///
+    /// Example: tags = ["sigint", "humint"] will match metadata with either tag
+    pub async fn metadata_by_tags(
+        &self,
+        tags: Vec<String>,
+    ) -> Result<Vec<MetadataGraphQL>> {
+        let metadata = Metadata::get_by_tags(&tags)?;
+        Ok(metadata.into_iter().map(|m| m.into()).collect())
+    }
+
+    /// Search for metadata records by tag pattern (case-insensitive, partial match)
+    ///
+    /// Returns all metadata where any tag contains the search pattern.
+    ///
+    /// Example: pattern = "int" will match "sigint", "humint", "intelligence", etc.
+    pub async fn search_metadata_by_tag(
+        &self,
+        pattern: String,
+    ) -> Result<Vec<MetadataGraphQL>> {
+        let metadata = Metadata::search_by_tag_pattern(&pattern)?;
+        Ok(metadata.into_iter().map(|m| m.into()).collect())
+    }
 }

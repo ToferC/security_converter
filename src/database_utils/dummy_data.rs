@@ -637,7 +637,7 @@ pub fn pre_populate_db_schema() -> Result<(), Error> {
     for authority in &created_authorities {
         // Create random number of conversion requests
 
-        for i in 30..rng.gen_range(40..=50) {
+        for i in 1..rng.gen_range(40..=50) {
 
             let creator = users.choose(&mut rng).unwrap();
             let source_nation = created_nations.iter()

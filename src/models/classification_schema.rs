@@ -7,7 +7,7 @@ use diesel::{QueryDsl, RunQueryDsl};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::models::{Authority, User};
+use crate::models::{Nation, User};
 use crate::{database, schema::*};
 
 #[derive(
@@ -16,7 +16,7 @@ use crate::{database, schema::*};
 #[graphql(complex)]
 #[diesel(table_name = classification_schemas)]
 #[diesel(belongs_to(User))]
-#[diesel(belongs_to(Authority))]
+#[diesel(belongs_to(Nation))]
 pub struct ClassificationSchema {
     pub id: Uuid,
     pub creator_id: Uuid, // User
@@ -36,7 +36,7 @@ pub struct ClassificationSchema {
     // Other details
     pub caveats: String,
     pub version: String,
-    pub authority_id: Uuid, // Authority
+    pub nation_id: Uuid, // Nation
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
     pub expires_at: Option<NaiveDateTime>,
@@ -49,8 +49,8 @@ impl ClassificationSchema {
         User::get_by_id(&self.creator_id)
     }
 
-    pub async fn get_authority(&self) -> Result<Authority> {
-        Authority::get_by_id(&self.authority_id)
+    pub async fn get_nation(&self) -> Result<Nation> {
+        Nation::get_by_id(&self.nation_id)
     }
 }
 
@@ -193,19 +193,19 @@ impl ClassificationSchema {
         Ok(results)
     }
 
-    pub fn get_by_authority_id(authority_id: &Uuid) -> Result<Vec<Self>> {
+    pub fn get_by_nation_id(nation_id: &Uuid) -> Result<Vec<Self>> {
         let mut conn = database::connection()?;
         let res = classification_schemas::table
-            .filter(classification_schemas::authority_id.eq(authority_id))
+            .filter(classification_schemas::nation_id.eq(nation_id))
             .load::<ClassificationSchema>(&mut conn)?;
         Ok(res)
     }
 
     // Return most recently updated Schema for a single nation by nation code
-    pub fn get_latest_by_authority_id(authority_id: &Uuid) -> Result<Self> {
+    pub fn get_latest_by_nation_id(nation_id: &Uuid) -> Result<Self> {
         let mut conn = database::connection()?;
         let res = classification_schemas::table
-            .filter(classification_schemas::authority_id.eq(authority_id))
+            .filter(classification_schemas::nation_id.eq(nation_id))
             .order(classification_schemas::updated_at.desc())
             .first(&mut conn)?;
         Ok(res)
@@ -346,7 +346,7 @@ pub struct NewClassificationSchema {
     // Other details
     pub caveats: String,
     pub version: String,
-    pub authority_id: Uuid, // Authority
+    pub nation_id: Uuid, // Nation
     pub expires_at: Option<NaiveDateTime>,
 }
 
@@ -367,7 +367,7 @@ impl NewClassificationSchema {
         from_nato_top_secret: String,
         caveats: String,
         version: String,
-        authority_id: Uuid,
+        nation_id: Uuid,
         expires_at: Option<NaiveDateTime>,
     ) -> Self {
         NewClassificationSchema {
@@ -385,7 +385,7 @@ impl NewClassificationSchema {
             from_nato_top_secret,
             caveats,
             version,
-            authority_id,
+            nation_id,
             expires_at,
         }
     }

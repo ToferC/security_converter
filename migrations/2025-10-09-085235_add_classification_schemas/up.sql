@@ -20,9 +20,9 @@ CREATE TABLE IF NOT EXISTS classification_schemas (
     -- Other details
     caveats TEXT NOT NULL DEFAULT '',
     version VARCHAR(32) NOT NULL,
-    authority_id UUID NOT NULL,
-        FOREIGN KEY(authority_id)
-        REFERENCES authorities(id) ON DELETE RESTRICT,
+    nation_id UUID NOT NULL,
+        FOREIGN KEY(nation_id)
+        REFERENCES nations(id) ON DELETE RESTRICT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMP DEFAULT NULL
@@ -31,6 +31,6 @@ CREATE TABLE IF NOT EXISTS classification_schemas (
 -- Indexes for efficient querying
 CREATE INDEX classification_schemas__creator_id_idx ON classification_schemas(creator_id);
 CREATE INDEX classification_schemas__nation_code_idx ON classification_schemas(nation_code);
-CREATE INDEX classification_schemas__authority_id_idx ON classification_schemas(authority_id);
+CREATE INDEX classification_schemas__nation_id_idx ON classification_schemas(nation_id);
 CREATE INDEX classification_schemas__version_idx ON classification_schemas(version);
 CREATE UNIQUE INDEX classification_schemas__nation_version_idx ON classification_schemas(nation_code, version);

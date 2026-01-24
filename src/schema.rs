@@ -52,7 +52,7 @@ diesel::table! {
         caveats -> Text,
         #[max_length = 32]
         version -> Varchar,
-        authority_id -> Uuid,
+        nation_id -> Uuid,
         created_at -> Timestamp,
         updated_at -> Timestamp,
         expires_at -> Nullable<Timestamp>,
@@ -215,7 +215,7 @@ diesel::table! {
 }
 
 diesel::joinable!(authorities -> nations (nation_id));
-diesel::joinable!(classification_schemas -> authorities (authority_id));
+diesel::joinable!(classification_schemas -> nations (nation_id));
 diesel::joinable!(classification_schemas -> users (creator_id));
 diesel::joinable!(conversion_requests -> authorities (authority_id));
 diesel::joinable!(conversion_requests -> data_objects (data_object_id));

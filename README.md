@@ -20,6 +20,7 @@ Thoughts/Questions/To-do:
 - [ ] Should we set up for Authority to Authority sharing?
 - [ ] What is the best model for Context to Context sharing?
 - [ ] Need to add Releasable options to ConversionSchema.
+- [ ] Set up so that conversion_schema is only accessible through nation. Authority will query nation_id to retrieve.
 
 ## Dependencies
 

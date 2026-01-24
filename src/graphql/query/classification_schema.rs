@@ -48,13 +48,13 @@ impl ClassificationSchemaQuery {
         ClassificationSchema::get_by_nation_code_and_version(&nation_code, &version)
     }
 
-    /// Returns classification schemas by authority ID
-    pub async fn classification_schemas_by_authority_id(
+    /// Returns classification schemas by nation ID
+    pub async fn classification_schemas_by_nation_id(
         &self,
         _context: &Context<'_>,
-        authority_id: Uuid,
+        nation_id: Uuid,
     ) -> Result<Vec<ClassificationSchema>> {
-        ClassificationSchema::get_by_authority_id(&authority_id)
+        ClassificationSchema::get_by_nation_id(&nation_id)
     }
 
     /// Returns the latest classification schema for a given nation code

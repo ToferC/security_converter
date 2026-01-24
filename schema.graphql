@@ -527,7 +527,7 @@ type UserResponse {
   role: String!
   email: String!
   authorityId: UUID
-  expires_at: NaiveDateTime!
+  expiresAt: NaiveDateTime!
 }
 "Input type for filtering audit logs"
 input AuditLogFilter {

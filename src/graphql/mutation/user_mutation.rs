@@ -22,7 +22,7 @@ pub struct UserResponse {
     role: String,
     email: String,
     authority_id: Option<Uuid>,
-    expires_at: DateTime<Local>,
+    expires_at: NaiveDateTime,
 }
 
 // Mutation Example
@@ -166,7 +166,7 @@ impl UserMutation {
                         bearer: token.to_owned(),
                         role: user.role,
                         authority_id: user.authority_id,
-                        expires_at: expiry
+                        expires_at: expiry.naive_local()
                     };
 
 

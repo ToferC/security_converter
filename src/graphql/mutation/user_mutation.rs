@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use async_graphql::*;
+use chrono::{DateTime, Local, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 use crate::models::{InsertableUser, LoginQuery,
     User, UserData, create_token, decode_token,
@@ -21,6 +22,7 @@ pub struct UserResponse {
     role: String,
     email: String,
     authority_id: Option<Uuid>,
+    expires_at: DateTime<Local>,
 }
 
 // Mutation Example
@@ -156,7 +158,7 @@ impl UserMutation {
 
                     // Return the token which would be accepted by the Epicenter 
                     // app and used to authenticate actions
-                    let token = create_token(user.id.to_string(), role);
+                    let (token, expiry) = create_token(user.id.to_string(), role)?;
 
                     let res = UserResponse {
                         id: user.id,
@@ -164,6 +166,7 @@ impl UserMutation {
                         bearer: token.to_owned(),
                         role: user.role,
                         authority_id: user.authority_id,
+                        expires_at: expiry
                     };
 
 
